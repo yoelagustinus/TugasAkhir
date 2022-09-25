@@ -13,75 +13,16 @@ from tensorflow.keras.callbacks import EarlyStopping
 from sklearn.preprocessing import RobustScaler, MinMaxScaler
 import seaborn as sns 
 import mysql.connector as mysql
+import yfinance as yf
 
 #hyperparameters
-epochs  = 100
-unit = 10 #units
+arr_epochs  = [10,100,1000]
+arr_units = [10,50,128]
+start_date = '2017-01-01'
 
-year_start_date = '2017' #nanti dibuat array
-start_date = year_start_date+'-01-01'
-end_date =  '2021-12-31'
+arr_end_date = ['2021-12-31','2017-12-31', '2017-03-30']
+arr_symbol_dataset = ['GGRM.jk', 'PSDN.jk']
 
-symbol_dataset = 'UNVR.jk'
-
-import yfinance as yf 
-df = yf.download(symbol_dataset, start=start_date, end=end_date)
-
-# Create a quick overview of the dataset
-df
-
-# Indexing Batches
-train_df = df.sort_values(by=['Date']).copy()
-
-# Daftar Fitur yang digunakan
-FEATURES = ['High', 'Low', 'Open', 'Close', 'Volume']
-
-print('FEATURE LIST')
-print([f for f in FEATURES])
-
-# Buat kumpulan data dengan fitur dan filter data ke daftar FEATURES
-data = pd.DataFrame(train_df)
-data_filtered = data[FEATURES]
-
-# Kami menambahkan kolom prediksi dan menetapkan nilai dummy untuk menyiapkan data untuk penskalaan
-data_filtered_ext = data_filtered.copy()
-data_filtered_ext['Prediction'] = data_filtered_ext['Close']
-
-# Print the dataframe
-data_filtered_ext
-
-# Dapatkan jumlah baris dalam data
-nrows = data_filtered.shape[0]
-print(nrows)
-
-# Convert the data ke numpy values
-np_data_unscaled = np.array(data_filtered)
-print(np_data_unscaled)
-np_data = np.reshape(np_data_unscaled, (nrows, -1))
-print(np_data.shape)
-
-# Transform the data by scaling each feature to a range between 0 and 1 using MinMaxScaler
-scaler = MinMaxScaler(feature_range=(0,1))
-np_data_scaled = scaler.fit_transform(np_data_unscaled)
-
-# Membuat scaler terpisah yang berfungsi pada satu kolom untuk prediksi penskalaan
-scaler_pred = MinMaxScaler(feature_range=(0,1))
-df_Close = pd.DataFrame(data_filtered_ext['Close'])
-np_Close_scaled = scaler_pred.fit_transform(df_Close)
-
-# Set the sequence length - this is the timeframe used to make a single prediction
-sequence_length = 1
-
-# Prediction Index
-index_Close = data.columns.get_loc("Close")
-
-# Split the training data into train and train data sets
-# As a first step, we get the number of rows to train the model on 80% of the data 
-train_data_len = math.ceil(np_data_scaled.shape[0] * 0.8)
-
-# Create the training and test data
-train_data = np_data_scaled[0:train_data_len, :]
-test_data = np_data_scaled[train_data_len - sequence_length:, :]
 
 # The RNN needs data with the format of [samples, time steps, features]
 # Here, we create N samples, sequence_length time steps per sample, and 6 features
@@ -97,75 +38,157 @@ def partition_dataset(sequence_length, data):
     y = np.array(y)
     return x, y
 
-# Generate training data and test data
-x_train, y_train = partition_dataset(sequence_length, train_data)
-x_test, y_test = partition_dataset(sequence_length, test_data)
+jumlah_pengujian = 0
+for index_dataset in arr_symbol_dataset:
+    for index_end_date in arr_end_date:
+        for epoch in arr_epochs:
+            for unit in arr_units: 
+                
+                jumlah_pengujian+=1
+                df = yf.download(index_dataset, start=start_date, end=index_end_date)
+                if df.shape[0]>=1250:
+                    term_status = "long"
+                elif df.shape[0]>=250:
+                    term_status = "mid"
+                else:
+                    term_status = "short"
 
-# Configure the neural network model
-model = Sequential()
-model.add(LSTM(unit, return_sequences=False, input_shape=(x_train.shape[1], x_train.shape[2]))) 
-model.add(Dense(1))
+                # Indexing Batches
+                train_df = df.sort_values(by=['Date']).copy()
+
+                # Daftar Fitur yang digunakan
+                FEATURES = ['High', 'Low', 'Open', 'Close', 'Volume']
+
+                print('FEATURE LIST')
+                print([f for f in FEATURES])
+
+                # Buat kumpulan data dengan fitur dan filter data ke daftar FEATURES
+                data = pd.DataFrame(train_df)
+                data_filtered = data[FEATURES]
+
+                # Kami menambahkan kolom prediksi dan menetapkan nilai dummy untuk menyiapkan data untuk penskalaan
+                data_filtered_ext = data_filtered.copy()
+                data_filtered_ext['Prediction'] = data_filtered_ext['Close']
+
+                # Dapatkan jumlah baris dalam data
+                nrows = data_filtered.shape[0]
+                # print(nrows)
+
+                # Convert the data ke numpy values
+                np_data_unscaled = np.array(data_filtered)
+                # print(np_data_unscaled)
+                np_data = np.reshape(np_data_unscaled, (nrows, -1))
+                # print(np_data.shape)
+
+                # Transform the data by scaling each feature to a range between 0 and 1 using MinMaxScaler
+                scaler = MinMaxScaler(feature_range=(0,1))
+                np_data_scaled = scaler.fit_transform(np_data_unscaled)
+
+                # Membuat scaler terpisah yang berfungsi pada satu kolom untuk prediksi penskalaan
+                scaler_pred = MinMaxScaler(feature_range=(0,1))
+                df_Close = pd.DataFrame(data_filtered_ext['Close'])
+                np_Close_scaled = scaler_pred.fit_transform(df_Close)
+
+                # Set the sequence length - this is the timeframe used to make a single prediction
+                sequence_length = 1
+
+                # Prediction Index
+                index_Close = data.columns.get_loc("Close")
+
+                # Split the training data into train and train data sets
+                # As a first step, we get the number of rows to train the model on 80% of the data 
+                train_data_len = math.ceil(np_data_scaled.shape[0] * 0.8)
+
+                # Create the training and test data
+                train_data = np_data_scaled[0:train_data_len, :]
+                test_data = np_data_scaled[train_data_len - sequence_length:, :]
+
+                # Generate training data and test data
+                x_train, y_train = partition_dataset(sequence_length, train_data)
+                x_test, y_test = partition_dataset(sequence_length, test_data)
+
+                # Configure the neural network model
+                model = Sequential()
+                model.add(LSTM(unit, return_sequences=False, input_shape=(x_train.shape[1], x_train.shape[2]))) 
+                model.add(Dense(1))
 
 
-# Compile the model
-model.compile(optimizer='adam', loss='mse')
+                # Compile the model
+                model.compile(optimizer='adam', loss='mse')
+                # Training the model
+                early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
+                history = model.fit(x_train, y_train, batch_size=16, epochs=epoch,validation_data=(x_test, y_test))
 
-# Training the model
-early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
-history = model.fit(x_train, y_train, 
-                    batch_size=16, 
-                    epochs=epochs,
-                    validation_data=(x_test, y_test)
-                    )
+                # Get the predicted values
+                y_pred_scaled = model.predict(x_test)
 
-# Get the predicted values
-y_pred_scaled = model.predict(x_test)
-# Unscale the predicted values
-y_pred = scaler_pred.inverse_transform(y_pred_scaled)
-y_test_unscaled = scaler_pred.inverse_transform(y_test.reshape(-1, 1))
+                # Unscale the predicted values
+                y_pred = scaler_pred.inverse_transform(y_pred_scaled)
+                y_test_unscaled = scaler_pred.inverse_transform(y_test.reshape(-1, 1))
 
-print(f'Jumlah data y_pred: {y_pred.shape[0]}')
-print(f'Jumlah data y_test_unscaled: {y_test_unscaled.shape[0]}')
+                # Root Mean Square Error (RMSE)
+                MSE = mean_squared_error(y_test_unscaled, y_pred)
+                RMSE = math.sqrt(MSE)
+                RMSE = np.round(RMSE, 2)
+                print(f'Root Mean Square Error (RMSE): {RMSE}')
 
-# Root Mean Square Error (RMSE)
-MSE = np.square(np.subtract(y_test_unscaled, y_pred)).mean()
-RMSE = math.sqrt(MSE)
-RMSE = np.round(RMSE, 2)
-print(f'Root Mean Square Error (RMSE): {RMSE}')
+                # Mean Absolute Error (MAE)
+                MAE = mean_absolute_error(y_test_unscaled, y_pred)
+                MAE = np.round(MAE, 2)
+                print(f'Median Absolute Error (MAE): {MAE}')
 
-# Mean Absolute Error (MAE)
-MAE = mean_absolute_error(y_test_unscaled, y_pred)
-MAE = np.round(MAE, 2)
-print(f'Median Absolute Error (MAE): {MAE}')
+                # Mean Absolute Percentage Error (MAPE)
+                MAPE = np.mean((np.abs(np.subtract(y_test_unscaled, y_pred)/ y_test_unscaled))) * 100
+                MAPE = np.round(MAPE, 2)
+                print(f'Mean Absolute Percentage Error (MAPE): {MAPE} %')
 
-# Mean Absolute Percentage Error (MAPE)
-MAPE = np.mean((np.abs(np.subtract(y_test_unscaled, y_pred)/ y_test_unscaled))) * 100
-MAPE = np.round(MAPE, 2)
-print(f'Mean Absolute Percentage Error (MAPE): {MAPE} %')
+                #save plot
+                # The date from which on the date is displayed
+                display_start_date = start_date
 
-# The date from which on the date is displayed
-display_start_date = start_date
+                # Add the difference between the valid and predicted prices
+                train = pd.DataFrame(data_filtered_ext['Close'][:train_data_len + 1]).rename(columns={'Close': 'y_train'})
+                valid = pd.DataFrame(data_filtered_ext['Close'][train_data_len:]).rename(columns={'Close': 'y_test'})
+                valid.insert(1, "y_pred", y_pred, True)
+                # valid.insert(1, "residuals", valid["y_pred"] - valid["y_test"], True)
+                df_union = pd.concat([train, valid])
 
-# Add the difference between the valid and predicted prices
-train = pd.DataFrame(data_filtered_ext['Close'][:train_data_len + 1]).rename(columns={'Close': 'y_train'})
-valid = pd.DataFrame(data_filtered_ext['Close'][train_data_len:]).rename(columns={'Close': 'y_test'})
-valid.insert(1, "y_pred", y_pred, True)
-# valid.insert(1, "residuals", valid["y_pred"] - valid["y_test"], True)
-df_union = pd.concat([train, valid])
+                # Zoom in to a closer timeframe
+                df_union_zoom = df_union[df_union.index > display_start_date]
 
-# Zoom in to a closer timeframe
-df_union_zoom = df_union[df_union.index > display_start_date]
+                # Create the lineplot
+                fig, ax1 = plt.subplots(figsize=(16, 8))
+                plt.title("Predict Data vs Test Data")
 
-# Create the lineplot
-fig, ax1 = plt.subplots(figsize=(16, 8))
-plt.title("Predict Data vs Test Data")
+                sns.set_palette(["#FF0000", "#1960EF", "#00FF00"])
+                sns.lineplot(data=df_union_zoom[['y_pred', 'y_train', 'y_test']], linewidth=1.0, dashes=False, ax=ax1)
+                plt.savefig("../results/plots/LSTM/" + index_dataset +'_LSTM-'+ 
+                            term_status + '_'+ str(epoch) +'_'+ str(unit) + '.pdf')
+                plt.legend()
 
-sns.set_palette(["#FF0000", "#1960EF", "#00FF00"])
-sns.lineplot(data=df_union_zoom[['y_pred', 'y_train', 'y_test']], linewidth=1.0, dashes=False, ax=ax1)
+                #save to new dataset
+                new_data = pd.DataFrame(data_filtered_ext['Close'][train_data_len:]).rename(columns={'Close': 'real_close'})
+                new_data['close_lstm'] = y_pred
+                df_new_data = pd.DataFrame(new_data)
+                df_new_data.to_csv("../results/datasets/" + index_dataset
+                +'_LSTM-'+ term_status + '_'+ str(epoch) +'_'+ str(unit) + '.csv', index=True)
 
+                obs_dataset = index_dataset+'-'+term_status
 
-plt.legend()
-plt.show()
+                #connect database
+                mydb = mysql.connect(
+                    host="localhost",
+                    user="root",
+                    password="",
+                    database="db_tugasakhir"
+                )
+                mycursor = mydb.cursor()
 
-#save a new dataset
-df_new_data = pd.DataFrame(df_union_zoom)
+                #insert to database
+                sql = "INSERT INTO pengujian_lstm (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+                val = (obs_dataset, start_date, index_end_date, epoch, unit, RMSE, MAE, MAPE)
+
+                mycursor.execute(sql,val)
+                mydb.commit()
+                print("pengujian ke: " + str(jumlah_pengujian))
+                print("=================================================================")
