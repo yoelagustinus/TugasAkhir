@@ -102,12 +102,17 @@ for index_dataset in arr_symbol_dataset:
                 print('D: ' + str(d))
                 print('Q: ' + str(q))
                 rmse = math.sqrt(mean_squared_error(y, predictions))
-                print('RMSE: '+ str("{:.2f}".format(rmse)))
+                rmse = np.round(rmse, 2)
+                print(f'Root Mean Square Error (RMSE): {rmse}')
+
                 mae = mean_absolute_error(y, predictions)
-                print('MAE: '+ str("{:.2f}".format(mae)))
+                mae = np.round(mae, 2)
+                print(f'Median Absolute Error (MAE): {mae}')
+
                 mape = mean_absolute_percentage_error(y, predictions)
                 mape = mape*100
-                print('MAPE: '+ str("{:.2f}".format(mape)) + ' %')
+                mape = np.round(mape, 2)
+                print(f'Mean Absolute Percentage Error (MAPE): {mape} %')
 
 
 
