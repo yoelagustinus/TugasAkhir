@@ -18,10 +18,10 @@ import yfinance as yf
 #hyperparameters
 arr_epochs  = [10,100,1000]
 arr_units = [10,50,128]
-start_date = '2017-01-01'
+start_date = "2017-01-01"
 
-arr_end_date = ['2021-12-31','2017-12-31', '2017-03-30']
-arr_symbol_dataset = ['GGRM.jk', 'PSDN.jk']
+arr_end_date = ["2021-12-31","2017-12-31", "2017-03-31"]
+arr_symbol_dataset = ["GGRM.jk","UNVR.jk","PSDN.jk"]
 
 
 # The RNN needs data with the format of [samples, time steps, features]
@@ -162,16 +162,14 @@ for index_dataset in arr_symbol_dataset:
 
                 sns.set_palette(["#FF0000", "#1960EF", "#00FF00"])
                 sns.lineplot(data=df_union_zoom[['y_pred', 'y_train', 'y_test']], linewidth=1.0, dashes=False, ax=ax1)
-                plt.savefig("../results/plots/LSTM/" + index_dataset +'_LSTM-'+ 
-                            term_status + '_'+ str(epoch) +'_'+ str(unit) + '.pdf')
+                plt.savefig("../results/LSTM/plots/" + index_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.pdf')
                 plt.legend()
 
                 #save to new dataset
                 new_data = pd.DataFrame(data_filtered_ext['Close'][train_data_len:]).rename(columns={'Close': 'real_close'})
                 new_data['close_lstm'] = y_pred
                 df_new_data = pd.DataFrame(new_data)
-                df_new_data.to_csv("../results/datasets/" + index_dataset
-                +'_LSTM-'+ term_status + '_'+ str(epoch) +'_'+ str(unit) + '.csv', index=True)
+                df_new_data.to_csv("../results/LSTM/datasets/" + index_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.csv', index=True)
 
                 obs_dataset = index_dataset+'-'+term_status
 
