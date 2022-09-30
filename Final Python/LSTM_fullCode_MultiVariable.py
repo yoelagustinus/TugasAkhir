@@ -9,7 +9,8 @@ import tensorflow as tf
 from sklearn.metrics import mean_absolute_error, mean_squared_error 
 from tensorflow.keras import Sequential 
 from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping 
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import Bidirectional
 from sklearn.preprocessing import RobustScaler, MinMaxScaler
 import seaborn as sns 
 import mysql.connector as mysql
@@ -109,7 +110,7 @@ for index_dataset in arr_symbol_dataset:
 
                 # Configure the neural network model
                 model = Sequential()
-                model.add(LSTM(unit, return_sequences=False, input_shape=(x_train.shape[1], x_train.shape[2]))) 
+                model.add(Bidirectional(LSTM(unit, return_sequences=False, input_shape=(x_train.shape[1], x_train.shape[2]))))
                 model.add(Dense(1))
 
 
@@ -162,14 +163,14 @@ for index_dataset in arr_symbol_dataset:
 
                 sns.set_palette(["#FF0000", "#1960EF", "#00FF00"])
                 sns.lineplot(data=df_union_zoom[['y_pred', 'y_train', 'y_test']], linewidth=1.0, dashes=False, ax=ax1)
-                plt.savefig("../results/LSTM/plots/" + index_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.pdf')
+                plt.savefig("../results/LSTM2/plots/" + index_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.pdf')
                 plt.legend()
 
                 #save to new dataset
                 new_data = pd.DataFrame(data_filtered_ext['Close'][train_data_len:]).rename(columns={'Close': 'real_close'})
                 new_data['close_lstm'] = y_pred
                 df_new_data = pd.DataFrame(new_data)
-                df_new_data.to_csv("../results/LSTM/datasets/" + index_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.csv', index=True)
+                df_new_data.to_csv("../results/LSTM2/datasets/" + index_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.csv', index=True)
 
                 obs_dataset = index_dataset+'-'+term_status
 
@@ -183,7 +184,7 @@ for index_dataset in arr_symbol_dataset:
                 mycursor = mydb.cursor()
 
                 #insert to database
-                sql = "INSERT INTO pengujian_lstm (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+                sql = "INSERT INTO pengujian_lstm2 (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
                 val = (obs_dataset, start_date, index_end_date, epoch, unit, RMSE, MAE, MAPE)
 
                 mycursor.execute(sql,val)
