@@ -41,11 +41,7 @@ def partition_dataset(sequence_length, data):
 
 # Rmse, mae, mape
 def rmse_metric(actual, predicted):
-    sum_error = 0.0
-    for i in range(len(actual)):
-        prediction_error = predicted[i] - actual[i]
-        sum_error += (prediction_error ** 2)
-    mean_error = sum_error / float(len(actual))
+    mean_error = np.square(np.subtract(actual,predicted)).mean()
     return math.sqrt(mean_error)
 
 def mae_metric(actual, predicted):
