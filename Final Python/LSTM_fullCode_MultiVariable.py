@@ -39,6 +39,23 @@ def partition_dataset(sequence_length, data):
     y = np.array(y)
     return x, y
 
+# Rmse, mae, mape
+def rmse_metric(actual, predicted):
+    sum_error = 0.0
+    for i in range(len(actual)):
+        prediction_error = predicted[i] - actual[i]
+        sum_error += (prediction_error ** 2)
+    mean_error = sum_error / float(len(actual))
+    return math.sqrt(mean_error)
+
+def mae_metric(actual, predicted):
+    y_true, predicted = np.array(actual), np.array(predicted)
+    return np.mean(np.abs(actual - predicted))
+    
+def mape_metric(actual, predicted): 
+    actual, predicted = np.array(actual), np.array(predicted)
+    return np.mean(np.abs((actual - predicted) / actual)) * 100
+
 jumlah_pengujian = 0
 for index_dataset in arr_symbol_dataset:
     for index_end_date in arr_end_date:
@@ -128,18 +145,17 @@ for index_dataset in arr_symbol_dataset:
                 y_test_unscaled = scaler_pred.inverse_transform(y_test.reshape(-1, 1))
 
                 # Root Mean Square Error (RMSE)
-                MSE = mean_squared_error(y_test_unscaled, y_pred)
-                RMSE = math.sqrt(MSE)
+                RMSE = rmse_metric(y_test_unscaled, y_pred)
                 RMSE = np.round(RMSE, 2)
                 print(f'Root Mean Square Error (RMSE): {RMSE}')
 
                 # Mean Absolute Error (MAE)
-                MAE = mean_absolute_error(y_test_unscaled, y_pred)
+                MAE = mae_metric(y_test_unscaled, y_pred)
                 MAE = np.round(MAE, 2)
                 print(f'Median Absolute Error (MAE): {MAE}')
 
                 # Mean Absolute Percentage Error (MAPE)
-                MAPE = np.mean((np.abs(np.subtract(y_test_unscaled, y_pred)/ y_test_unscaled))) * 100
+                MAPE = mape_metric(y_test_unscaled, y_pred)
                 MAPE = np.round(MAPE, 2)
                 print(f'Mean Absolute Percentage Error (MAPE): {MAPE} %')
 

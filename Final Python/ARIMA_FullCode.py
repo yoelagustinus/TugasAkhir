@@ -25,6 +25,22 @@ column_dataset_obs = 'Close'
 # The RNN needs data with the format of [samples, time steps, features]
 # Here, we create N samples, sequence_length time steps per sample, and 6 features
 
+# Rmse, mae, mape
+def rmse_metric(actual, predicted):
+    sum_error = 0.0
+    for i in range(len(actual)):
+        prediction_error = predicted[i] - actual[i]
+        sum_error += (prediction_error ** 2)
+    mean_error = sum_error / float(len(actual))
+    return math.sqrt(mean_error)
+
+def mae_metric(actual, predicted):
+    y_true, predicted = np.array(actual), np.array(predicted)
+    return np.mean(np.abs(actual - predicted))
+    
+def mape_metric(actual, predicted): 
+    actual, predicted = np.array(actual), np.array(predicted)
+    return np.mean(np.abs((actual - predicted) / actual)) * 100
 
 jumlah_pengujian = 0
 
@@ -101,15 +117,15 @@ for index_dataset in arr_symbol_dataset:
                 print('P: ' + str(p))
                 print('D: ' + str(d))
                 print('Q: ' + str(q))
-                rmse = math.sqrt(mean_squared_error(y, predictions))
+                rmse = rmse_metric(y, predictions)
                 rmse = np.round(rmse, 2)
                 print(f'Root Mean Square Error (RMSE): {rmse}')
 
-                mae = mean_absolute_error(y, predictions)
+                mae = mae_metric(y, predictions)
                 mae = np.round(mae, 2)
                 print(f'Median Absolute Error (MAE): {mae}')
 
-                mape = mean_absolute_percentage_error(y, predictions)
+                mape = mape_metric(y, predictions)
                 mape = mape*100
                 mape = np.round(mape, 2)
                 print(f'Mean Absolute Percentage Error (MAPE): {mape} %')
