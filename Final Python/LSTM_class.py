@@ -42,7 +42,7 @@ class Preprocessing:
         train_df = df.sort_values(by=['Date']).copy()
 
         # Daftar Fitur yang digunakan
-        FEATURES = ['High', 'Low', 'Open', 'Close', 'Volume']
+        FEATURES = ['High', 'Low', 'Open', 'Close']
         data = pd.DataFrame(train_df)
         data_filtered = data[FEATURES]
 
@@ -138,7 +138,7 @@ arr_units = [10,50,128]
 start_date = "2017-01-01"
 
 arr_end_date = ["2021-12-31","2017-12-31", "2017-03-31"]
-arr_symbol_dataset = ["PSDN.jk"]
+arr_symbol_dataset = ["GGRM.jk","UNVR.jk","PSDN.jk"]
 
 jumlah_pengujian = 0
 for symbol_dataset in arr_symbol_dataset:
@@ -232,7 +232,7 @@ for symbol_dataset in arr_symbol_dataset:
                 mycursor = mydb.cursor()
 
                 #insert to database
-                sql = "INSERT INTO pengujian_lstm2 (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+                sql = "INSERT INTO pengujian_lstm3 (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
                 val = (obs_dataset, start_date, end_date, epoch, unit, RMSE, MAE, MAPE)
 
                 mycursor.execute(sql,val)
