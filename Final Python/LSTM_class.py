@@ -42,7 +42,7 @@ class Preprocessing:
         train_df = df.sort_values(by=['Date']).copy()
 
         # Daftar Fitur yang digunakan
-        FEATURES = ['High', 'Low', 'Open', 'Close']
+        FEATURES = ['High', 'Low', 'Open', 'Close', 'Volume']
         data = pd.DataFrame(train_df)
         data_filtered = data[FEATURES]
 
