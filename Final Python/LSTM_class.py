@@ -118,7 +118,7 @@ class LSTM_unit:
         model.add(Dense(1))
 
         # Compile the model
-        model.compile(optimizer='adam', loss='mse')
+        model.compile(loss='mse')
         # Training the model
         early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
         history = model.fit(x_train, y_train, 
@@ -133,12 +133,12 @@ class LSTM_unit:
 
 
 #hyperparameters
-arr_epochs  = [10,100,1000]
+arr_epochs  = [10,100]
 arr_units = [10,50,128]
 start_date = "2017-01-01"
 
 arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
-arr_symbol_dataset = ["GGRM.jk","UNVR.jk","PSDN.jk"]
+arr_symbol_dataset = ["GGRM.jk"]
 
 jumlah_pengujian = 0
 for symbol_dataset in arr_symbol_dataset:
