@@ -125,7 +125,7 @@ class LSTM_unit:
                 batch_size=16, 
                 epochs=epoch,
                 validation_data=(x_test, y_test))
-        return x_test, model
+        return x_test, model, history
         
     def predict_model(x_test,model):
         y_pred_scaled = model.predict(x_test)
@@ -167,13 +167,24 @@ for symbol_dataset in arr_symbol_dataset:
                 x_train, y_train, x_test, y_test, train_data_len = Preprocessing.splitting_dataset(np_data_scaled,data) 
 
                 # Train the Multivariable Prediction Model
-                x_test,model=LSTM_unit.training_model(x_train, y_train, x_test, y_test, unit, epoch)
+                x_test,model,history=LSTM_unit.training_model(x_train, y_train, x_test, y_test, unit, epoch)
 
                 # Predict data using data test
                 y_pred_scaled = LSTM_unit.predict_model(x_test,model)
 
                 #inverse minmax
                 y_pred, y_test_unscaled = Preprocessing.inverse_minmax(y_pred_scaled, y_test)
+
+                # # Plot training & validation loss values
+                fig, ax = plt.subplots(figsize=(16, 5), sharex=True)
+                sns.lineplot(data=history.history["loss"])
+                plt.title("Model loss")
+                plt.ylabel("Loss")
+                plt.xlabel("Epoch")
+                ax.xaxis.set_major_locator(plt.MaxNLocator(epoch))
+                plt.legend(["Train"], loc="upper left")
+                plt.grid()
+                # plt.show()
 
                 # Evaluate model performance
                 # Root Mean Square Error (RMSE)
