@@ -64,3 +64,89 @@ class ARIMA_model:
             history.append(obs)
         
         return predictions, y
+
+
+#hyperparameters
+arr_p  = [1,2]
+arr_q = [1,2]
+start_date = "2017-01-01"
+d = 1
+
+arr_end_date = ["2021-12-31","2017-12-31", "2017-03-31"]
+arr_symbol_dataset = ["GGRM.jk","UNVR.jk","PSDN.jk"]
+column_dataset_obs = 'Close'
+
+jumlah_pengujian = 0
+
+
+for symbol_dataset in arr_symbol_dataset:
+    for end_date in arr_end_date:
+        for ordo_p in arr_p:
+            for ordo_q in arr_q:
+                
+                jumlah_pengujian += 1
+
+                df = DataLoad.read_data(start_date, end_date, symbol_dataset)
+
+                if df.shape[0]>=1250:
+                    term_status = "long"
+                elif df.shape[0]>=250:
+                    term_status = "mid"
+                else:
+                    term_status = "short"
+                    
+                train_data, test_data = Preprocessing.splitting_dataset(data)
+
+                predictions, y = ARIMA_model.forecast_model(train_data, test_data, p,q)
+
+                plt.figure(figsize=(16,8))
+                plt.plot(data.index[:], data[column_dataset_obs], color='green', label = 'Train Stock Price')
+                plt.plot(test_data.index, y, color = 'red', label = 'Real Stock Price')
+                plt.plot(test_data.index, predictions, color = 'blue', label = 'Predicted Stock Price')
+                plt.title(symbol_dataset+ ' - ' + term_status +  ' Stock Prediction, p: '+ str(p) +'; q: '+str(q))
+                plt.xlabel('Time')
+                plt.ylabel(symbol_dataset +' Stock Price '+ column_dataset_obs)
+                plt.legend()
+                plt.grid(True)
+                #plt.savefig("../results/ARIMA/plots/" + symbol_dataset +'_ARIMA-'+ 
+                                            term_status + '_p='+ str(p) +'_q='+ str(q) + '.pdf')
+                
+                plt.figure()
+                plt.plot(test_data.index, y, color = 'red', label = 'Real Stock Price')
+                plt.plot(test_data.index, predictions, color = 'blue', label = 'Predicted Stock Price')
+                plt.title(symbol_dataset+ ' - ' + term_status +' Stock Prediction, p: '+ str(p) +'; q: '+str(q))
+                plt.xlabel('Time')
+                plt.ylabel(symbol_dataset +' Stock Price '+ column_dataset_obs)
+                plt.legend()
+                plt.grid(True)
+                
+                # mse = mean_squared_error(y, predictions)
+                # print('MSE: '+str(mse))
+                print(symbol_dataset+"-"+term_status)
+                print('P: ' + str(p))
+                print('D: ' + str(d))
+                print('Q: ' + str(q))
+
+                rmse = rmse_metric(y, predictions)
+                rmse = np.round(rmse, 2)
+                print(f'Root Mean Square Error (RMSE): {rmse}')
+
+                mae = mae_metric(y, predictions)
+                mae = np.round(mae, 2)
+                print(f'Median Absolute Error (MAE): {mae}')
+
+                mape = mape_metric(y, predictions)
+                mape = mape*100
+                mape = np.round(mape, 2)
+                print(f'Mean Absolute Percentage Error (MAPE): {mape} %')
+
+                price_prediction=predictions
+                new_date = pd.to_datetime(test_data.index)
+
+                new_data = {'Date': new_date,
+                    'real_close': y,
+                'close_arima': price_prediction}
+
+                df_new_data = pd.DataFrame(new_data, columns = ['Date', 'real_close','close_arima'])
+
+                #df_new_data.to_csv("../results/ARIMA/datasets/" + term_status + "/"+ symbol_dataset + '_ARIMA-'+ term_status + '_p='+ str(p) +'_q='+ str(q) + '.csv', index=False)

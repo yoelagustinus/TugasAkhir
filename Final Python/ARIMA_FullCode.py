@@ -10,21 +10,6 @@ import math
 from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
 import mysql.connector as mysql
 
-
-#hyperparameters
-arr_p  = [1,2]
-arr_q = [1,2]
-start_date = "2017-01-01"
-d = 1
-
-arr_end_date = ["2021-12-31","2017-12-31", "2017-03-31"]
-arr_symbol_dataset = ["GGRM.jk","UNVR.jk","PSDN.jk"]
-column_dataset_obs = 'Close'
-
-
-# The RNN needs data with the format of [samples, time steps, features]
-# Here, we create N samples, sequence_length time steps per sample, and 6 features
-
 # Rmse, mae, mape
 def rmse_metric(actual, predicted):
     mean_error = np.square(np.subtract(actual,predicted)).mean()
