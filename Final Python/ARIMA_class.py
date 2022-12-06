@@ -1,7 +1,7 @@
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import matplotlib.pylab as plt
-%matplotlib inline
+
 import statsmodels.api as sm
 from matplotlib.pylab import rcParams
 rcParams['figure.figsize'] = 15, 6
@@ -81,8 +81,8 @@ jumlah_pengujian = 0
 
 for symbol_dataset in arr_symbol_dataset:
     for end_date in arr_end_date:
-        for ordo_p in arr_p:
-            for ordo_q in arr_q:
+        for p in arr_p:
+            for q in arr_q:
                 
                 jumlah_pengujian += 1
 
@@ -95,12 +95,12 @@ for symbol_dataset in arr_symbol_dataset:
                 else:
                     term_status = "short"
                     
-                train_data, test_data = Preprocessing.splitting_dataset(data)
+                train_data, test_data = Preprocessing.splitting_dataset(df)
 
                 predictions, y = ARIMA_model.forecast_model(train_data, test_data, p,q)
 
                 plt.figure(figsize=(16,8))
-                plt.plot(data.index[:], data[column_dataset_obs], color='green', label = 'Train Stock Price')
+                plt.plot(df.index[:], df[column_dataset_obs], color='green', label = 'Train Stock Price')
                 plt.plot(test_data.index, y, color = 'red', label = 'Real Stock Price')
                 plt.plot(test_data.index, predictions, color = 'blue', label = 'Predicted Stock Price')
                 plt.title(symbol_dataset+ ' - ' + term_status +  ' Stock Prediction, p: '+ str(p) +'; q: '+str(q))
@@ -108,8 +108,7 @@ for symbol_dataset in arr_symbol_dataset:
                 plt.ylabel(symbol_dataset +' Stock Price '+ column_dataset_obs)
                 plt.legend()
                 plt.grid(True)
-                #plt.savefig("../results/ARIMA/plots/" + symbol_dataset +'_ARIMA-'+ 
-                                            term_status + '_p='+ str(p) +'_q='+ str(q) + '.pdf')
+                #plt.savefig("../results/ARIMA/plots/" + symbol_dataset +'_ARIMA-'+ term_status + '_p='+ str(p) +'_q='+ str(q) + '.pdf')
                 
                 plt.figure()
                 plt.plot(test_data.index, y, color = 'red', label = 'Real Stock Price')
@@ -127,15 +126,15 @@ for symbol_dataset in arr_symbol_dataset:
                 print('D: ' + str(d))
                 print('Q: ' + str(q))
 
-                rmse = rmse_metric(y, predictions)
+                rmse = EvaluasiForecasting.rmse_metric(y, predictions)
                 rmse = np.round(rmse, 2)
                 print(f'Root Mean Square Error (RMSE): {rmse}')
 
-                mae = mae_metric(y, predictions)
+                mae = EvaluasiForecasting.mae_metric(y, predictions)
                 mae = np.round(mae, 2)
                 print(f'Median Absolute Error (MAE): {mae}')
 
-                mape = mape_metric(y, predictions)
+                mape = EvaluasiForecasting.mape_metric(y, predictions)
                 mape = mape*100
                 mape = np.round(mape, 2)
                 print(f'Mean Absolute Percentage Error (MAPE): {mape} %')
