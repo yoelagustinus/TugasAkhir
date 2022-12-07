@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd 
 from datetime import date, timedelta, datetime 
 from pandas.plotting import register_matplotlib_converters 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+import seaborn as sns
 import matplotlib.dates as mdates 
 import tensorflow as tf
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
@@ -12,7 +13,7 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import Bidirectional
 from sklearn.preprocessing import RobustScaler, MinMaxScaler
-import seaborn as sns 
+
 import mysql.connector as mysql
 import yfinance as yf
 class EvaluasiForecasting:
@@ -120,7 +121,8 @@ class LSTM_unit:
         # Compile the model
         model.compile(loss='mse')
         # Training the model
-        early_stop = EarlyStopping(monitor='loss', patience=5, verbose=1)
+
+
         history = model.fit(x_train, y_train, 
                 batch_size=16, 
                 epochs=epoch,
@@ -134,18 +136,23 @@ class LSTM_unit:
 
 #hyperparameters
 arr_epochs  = [10,100,1000]
+# 10  100  1000
 arr_units = [10,50,128]
+# 10  50   128
 start_date = "2017-01-01"
 
-arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
-arr_symbol_dataset = ["GGRM.jk", "UNVR.jk", "PSDN.jk"]
+arr_end_date = ["2021-12-31", "2017-12-31", "2021-12-31"]
+arr_symbol_dataset = ["PSDN.jk"]
+
+# arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
+# arr_symbol_dataset = ["GGRM.jk", "UNVR.jk", "PSDN.jk"]
 
 jumlah_pengujian = 0
 for symbol_dataset in arr_symbol_dataset:
     for end_date in arr_end_date:
         for epoch in arr_epochs:
             for unit in arr_units: 
-                
+                epochs = 0
                 jumlah_pengujian+=1
 
                 # load the time series Data use Yahoo Finance
@@ -175,16 +182,26 @@ for symbol_dataset in arr_symbol_dataset:
                 #inverse minmax
                 y_pred, y_test_unscaled = Preprocessing.inverse_minmax(y_pred_scaled, y_test)
 
-                # # Plot training & validation loss values
-                fig, ax = plt.subplots(figsize=(16, 5), sharex=True)
-                sns.lineplot(data=history.history["loss"])
-                plt.title("Model loss")
-                plt.ylabel("Loss")
-                plt.xlabel("Epoch")
-                ax.xaxis.set_major_locator(plt.MaxNLocator(epoch))
-                plt.legend(["Train"], loc="upper left")
-                plt.grid()
-                # plt.show()
+                
+
+                #plot_metric(history,'loss')
+                
+
+                metric = 'loss'
+                train_metrics = history.history[metric]
+                val_metrics = history.history['val_'+metric]
+                epochs = range(1, len(train_metrics) + 1)
+                plt.plot(epochs, train_metrics)
+                plt.plot(epochs, val_metrics)
+                plt.title('Training and validation '+ metric + ' ' + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit))
+                plt.xlabel("Epochs")
+                plt.ylabel(metric)
+                plt.legend(["train_"+metric, 'val_'+metric])
+                plt.savefig("../results/LSTM_without_Earlystop/plots_metric/metric_loss_" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.png')
+
+                #train_metrics = history.history['loss']
+                stop_epochs = len(train_metrics)
+
 
                 # Evaluate model performance
                 # Root Mean Square Error (RMSE)
@@ -218,18 +235,18 @@ for symbol_dataset in arr_symbol_dataset:
 
                 # Create the lineplot
                 fig, ax1 = plt.subplots(figsize=(16, 8))
-                plt.title("Predict Data vs Test Data")
+                plt.title("Predict Data vs Test Data" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit))
 
                 sns.set_palette(["#FF0000", "#1960EF", "#00FF00"])
                 sns.lineplot(data=df_union_zoom[['y_pred', 'y_train', 'y_test']], linewidth=1.0, dashes=False, ax=ax1)
-                plt.savefig("../results/LSTM/plots/" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.pdf')
+                plt.savefig("../results/LSTM_without_Earlystop/plots/plots_" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.png')
                 plt.legend()
 
                 #save to new dataset
                 new_data = pd.DataFrame(data_filtered_ext['Close'][train_data_len:]).rename(columns={'Close': 'real_close'})
                 new_data['close_lstm'] = y_pred
                 df_new_data = pd.DataFrame(new_data)
-                df_new_data.to_csv("../results/LSTM/datasets/" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.csv', index=True)
+                df_new_data.to_csv("../results/LSTM_without_Earlystop/datasets/" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.csv', index=True)
 
                 obs_dataset = symbol_dataset+'-'+term_status
 
@@ -241,10 +258,11 @@ for symbol_dataset in arr_symbol_dataset:
                     database="db_tugasakhir"
                 )
                 mycursor = mydb.cursor()
+                
 
                 #insert to database
-                sql = "INSERT INTO pengujian_lstm3 (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
-                val = (obs_dataset, start_date, end_date, epoch, unit, RMSE, MAE, MAPE)
+                sql = "INSERT INTO pengujian_lstm_wo_es (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE, epoch_stop) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                val = (obs_dataset, start_date, end_date, epoch, unit, RMSE, MAE, MAPE, stop_epochs)
 
                 mycursor.execute(sql,val)
                 mydb.commit()
