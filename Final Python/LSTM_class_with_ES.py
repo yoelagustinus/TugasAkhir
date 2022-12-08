@@ -235,13 +235,13 @@ for symbol_dataset in arr_symbol_dataset:
                 df_union_zoom = df_union[df_union.index > display_start_date]
 
                 # Create the lineplot
-                fig, ax1 = plt.subplots(figsize=(16, 8))
-                plt.title("Predict Data vs Test Data" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit))
+                # fig, ax1 = plt.subplots(figsize=(16, 8))
+                # plt.title("Predict Data vs Test Data" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit))
 
-                sns.set_palette(["#FF0000", "#1960EF", "#00FF00"])
-                sns.lineplot(data=df_union_zoom[['y_pred', 'y_train', 'y_test']], linewidth=1.0, dashes=False, ax=ax1)
-                plt.savefig("../results/LSTM_with_Earlystop/plots/plots_" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.png')
-                plt.legend()
+                # sns.set_palette(["#FF0000", "#1960EF", "#00FF00"])
+                # sns.lineplot(data=df_union_zoom[['y_pred', 'y_train', 'y_test']], linewidth=1.0, dashes=False, ax=ax1)
+                # plt.savefig("../results/LSTM_with_Earlystop/plots/plots_" + symbol_dataset +'_LSTM-'+ term_status + '_e='+ str(epoch) +'_u='+ str(unit) + '.png')
+                # plt.legend()
 
                 #save to new dataset
                 new_data = pd.DataFrame(data_filtered_ext['Close'][train_data_len:]).rename(columns={'Close': 'real_close'})
