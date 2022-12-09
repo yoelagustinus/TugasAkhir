@@ -137,14 +137,14 @@ class LSTM_unit:
     
 
 #hyperparameters
-arr_epochs  = [1000]
+arr_epochs  = [10,100,1000]
 # 10  100  1000
-arr_units = [128]
+arr_units = [10,50,128]
 # 10  50   128
 start_date = "2017-01-01"
 
-arr_end_date = ["2021-12-31"]
-arr_symbol_dataset = ["PSDN.jk"]
+arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
+arr_symbol_dataset = ["GGRM.jk"]
 
 # arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
 # arr_symbol_dataset = ["GGRM.jk", "UNVR.jk", "PSDN.jk"]
