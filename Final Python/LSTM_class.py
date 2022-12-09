@@ -141,8 +141,8 @@ arr_units = [10,50,128]
 # 10  50   128
 start_date = "2017-01-01"
 
-arr_end_date = ["2021-12-31", "2017-12-31", "2021-12-31"]
-arr_symbol_dataset = ["UNVR.jk"]
+arr_end_date = ["2017-12-31", "2021-12-31"]
+arr_symbol_dataset = ["PSDN.jk"]
 
 # arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
 # arr_symbol_dataset = ["GGRM.jk", "UNVR.jk", "PSDN.jk"]
