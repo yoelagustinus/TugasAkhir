@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd 
 from datetime import date, timedelta, datetime 
 from pandas.plotting import register_matplotlib_converters 
-import matplotlib.pyplot as plt 
+
 import matplotlib.dates as mdates 
 import tensorflow as tf
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
@@ -15,6 +15,7 @@ from sklearn.preprocessing import RobustScaler, MinMaxScaler
 import seaborn as sns 
 import mysql.connector as mysql
 import yfinance as yf
+
 class EvaluasiForecasting:
     def rmse_metric(actual, predicted):
         mean_error = np.square(np.subtract(actual,predicted)).mean()
@@ -110,6 +111,7 @@ class Preprocessing:
         x_test, y_test = Preprocessing.partition_dataset(sequence_length, test_data, index_Close)
         
         return x_train, y_train, x_test, y_test, train_data_len
+        
 class LSTM_unit:
     def training_model(x_train, y_train, x_test, y_test, unit, epoch):
         # Configure the neural network model
@@ -137,13 +139,13 @@ class LSTM_unit:
     
 
 #hyperparameters
-arr_epochs  = [10,100,1000]
+arr_epochs  = [1000]
 # 10  100  1000
-arr_units = [10,50,128]
+arr_units = [10]
 # 10  50   128
 start_date = "2017-01-01"
 
-arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
+arr_end_date = ["2017-03-31"]
 arr_symbol_dataset = ["GGRM.jk"]
 
 # arr_end_date = ["2017-03-31", "2017-12-31", "2021-12-31"]
@@ -185,6 +187,7 @@ for symbol_dataset in arr_symbol_dataset:
                 y_pred, y_test_unscaled = Preprocessing.inverse_minmax(y_pred_scaled, y_test)
 
                 #Plot training & validation loss values
+                import matplotlib.pyplot as plt 
                 def plot_metric(history, metric):
                     train_metrics = history.history[metric]
                     val_metrics = history.history['val_'+metric]
