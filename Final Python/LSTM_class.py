@@ -111,6 +111,7 @@ class Preprocessing:
         x_test, y_test = Preprocessing.partition_dataset(sequence_length, test_data, index_Close)
         
         return x_train, y_train, x_test, y_test, train_data_len
+        
 class LSTM_unit:
     def training_model(x_train, y_train, x_test, y_test, unit, epoch):
         # Configure the neural network model
