@@ -149,3 +149,25 @@ for symbol_dataset in arr_symbol_dataset:
                 df_new_data = pd.DataFrame(new_data, columns = ['Date', 'real_close','close_arima'])
 
                 #df_new_data.to_csv("../results/ARIMA/datasets/" + term_status + "/"+ symbol_dataset + '_ARIMA-'+ term_status + '_p='+ str(p) +'_q='+ str(q) + '.csv', index=False)
+
+                
+
+                obs_dataset = symbol_dataset+'-'+term_status
+
+                #connect database
+                mydb = mysql.connect(
+                    host="localhost",
+                    user="root",
+                    password="",
+                    database="db_tugasakhir"
+                )
+                mycursor = mydb.cursor()
+
+                #insert to database
+                sql = "INSERT INTO pengujian_arima (datasets, start_dates, end_dates,p, d, q, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                val = (obs_dataset, start_date, index_end_date,p, d, q, rmse, mae, mape)
+
+                mycursor.execute(sql,val)
+                mydb.commit()
+                print("pengujian ke: " + str(jumlah_pengujian))
+                print("=================================================================")
