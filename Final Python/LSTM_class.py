@@ -9,10 +9,9 @@ import matplotlib.dates as mdates
 import tensorflow as tf
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
 from tensorflow.keras import Sequential 
-from tensorflow.keras.layers import LSTM, Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.layers import LSTM, Dense
 from tensorflow.keras.layers import Bidirectional
-from sklearn.preprocessing import RobustScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 
 import mysql.connector as mysql
 import yfinance as yf
@@ -262,7 +261,7 @@ for symbol_dataset in arr_symbol_dataset:
                 
 
                 #insert to database
-                sql = "INSERT INTO pengujian_lstm_wo_es (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE, epoch_stop) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+                sql = "INSERT INTO pengujian_lstm (datasets, start_dates, end_dates,epochs, units, RMSE, MAE, MAPE) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
                 val = (obs_dataset, start_date, end_date, epoch, unit, RMSE, MAE, MAPE, stop_epochs)
 
                 mycursor.execute(sql,val)
