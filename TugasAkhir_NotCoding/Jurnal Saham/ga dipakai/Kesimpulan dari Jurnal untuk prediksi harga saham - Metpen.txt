@@ -1,7 +1,0 @@
-Kesimpulan 
-1. 
-2. Hasil dari penelitian ini menyimpulkan bahwa algoritma machine learning dapat digunakan untuk memprediksi kenaikan atau penurunan kinerja pasar saham. Ini memverifikasi ketergantungan SADARI pada faktor-faktor yang diambil dalam penelitian ini. Temuan kami mengkonfirmasi bahwa ketergantungan SADARI tertinggi pada tingkat emas, karena faktor korelasi tertinggi. Juga, faktor korelasi terendah untuk tingkat perak, menunjukkan ketergantungan paling sedikit BSE di atasnya. Dari semua algoritma pembelajaran mesin yang digunakan, AdaBoost menunjukkan akurasi tertinggi sebesar 76,79% untuk 70% data pelatihan dan 75% untuk data tidak terlatih. Masih ada ruang lingkup perbaikan dalam proyek ini. Proyek ini dapat diperluas lebih lanjut untuk memasukkan variabel tambahan seperti kebijakan bunga, reformasi politik, dan ekonomi untuk mendapatkan hasil yang lebih akurat
-
-3. 
-
-Model Autoregresiive Integrated Moving Average (ARIMA) adalah model yang secara penuh mengabaikan independen variabel dalam membuat peramalan. ARIMA menggunakan nilai masa lalu dan sekarang dari variabel dependen untuk menghasilkan peramalan jangka pendek yang akurat.
